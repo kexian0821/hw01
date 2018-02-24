@@ -1,0 +1,235 @@
+---
+title: "hw01-Kexian-Chen"
+author: "Kexian Chen"
+date: "2018/2/21"
+output: github_document
+---
+
+```{r}
+
+ColNames <- c(
+              'symboling',
+              'normalized_losses',
+              'make',
+              'fuel_type',
+              'aspiration',
+              'num_of_doors',
+              'body_style',
+              'drive_wheels',
+              'engine_location',
+              'wheel_base',
+              'length',
+              'width',
+              'height',
+              'curb_weight',
+              'engine_type',
+              'num_of_cylinders',
+              'engine_size',
+              'fuel_system',
+              'bore',
+              'stroke',
+              'compression_ratio',
+              'horsepower',
+              'peak_rpm',
+              'city_mpg',
+              'highway_mpg',
+              'price'
+              )
+Coltype<- c(
+            'double',
+            'double',
+            'character',
+            'character',
+            'character',
+            'character',
+            'character',
+            'character',
+            'character',
+            'double',
+            'double',
+            'double',
+            'double',
+            'integer',
+            'character',
+            'character',
+            'integer',
+            'character',
+            'double',
+            'double',
+            'double',
+            'integer',
+            'integer',
+            'integer',
+            'integer',
+            'integer'
+            
+)
+data85<- read.csv('imports-85.data',col.names = ColNames,colClass = Coltype, sep = ",",stringsAsFactors = FALSE,na.strings = "?")
+object.size(data85)
+
+str(data85,vec.len =1)
+```
+Part3
+
+a.If you don¡¯t provide a vector of column names, what happens to the column names of the imported data when you simply invoke read.csv('imports-85.data')?
+        
+        If I don't provide a vector of column names, the read() function will just use the original names or the data appear on the first row in the data. Such as X3, alfa.romero,gas etc.
+
+
+b. If you don¡¯t provide a vector of column names, what happens to the column names of the imported data when you invoke read.csv('imports-85.data', header = FALSE)?
+        
+        The header or the column names will just become numbers listed from V1 to V27.
+
+
+c. When using the reading table functions, if you don¡¯t specify how missing values are codified, what happens to the data type of those columns that contain '?', e.g. price or num_of_doors?
+       
+        It will show a error message states that "expected 'a real',got'?'.Since the question mark doesn't count as numerical type, R does not reconized it.
+
+
+d. Say you import imports-85.data in two different ways. In the first option you import the data without specifying the data type of each column. In the second option you do specify the data types. You may wonder whether both options return a data frame of the same memory size. You can actually use the function object.size() that provides an estimate of the memory that is being used to store an R object. Why is the data frame imported in the second option bigger (in terms of bytes) than the data frame
+imported in the first option?
+       
+       The second method we specify the data types,some data like symboling, normalized losses are change to double. And we also specified don't import character as factor which also make the data size bigger.
+
+
+e. Say the object dat is the data frame produced when importing imports-85.data. What happens to the data values if you convert dat as an R matrix?
+        
+        It will hard for us to invoke the data.
+
+
+Part 4.Practice base plotting
+```{r}
+par(mfrow=c(2,2))
+hist(data85$price,main = "Histogram of Car Price in 1985",xlab="Price in dollar",col = 'pink')
+boxplot(data85$horsepower,horizontal = TRUE, main="Box plot of horsepower")
+barplot(sort(table(data85$body_style),decreasing = TRUE),main = "Frequency of style")
+
+asp<- data85$aspiration == 'turbo'
+aspiration<- data.frame(data85$wheel_base[asp],data85$length[asp],data85$width[asp],data85$height[asp],data85$price[asp])
+stars(aspiration,main = "Star plots")
+
+##For the histogram graph we can see that the car prices mostly are below $20000, most of the car prices are between 5000 to 10000, and we can see it is a right skwed histogram.
+
+##For the boxplot we can tell the first quantile is about 60, and the third quantile is about 120 and the median is about 90.
+
+##The barplot tells us the frequency of the body style, from the graph we can see that sedan, hatchback,and wagon are the most popular style.
+
+##Each star plots represents a single oberservation, with more relevant to a specific variable the more narrow apoint to that variable.   
+```
+Part 5.Summaries
+```{r}
+##a. What is the mean price of fuel_type gas cars? And what is the mean price of fuel_type diesel cars? (removing missing values)
+mean(data85$price[data85$fuel_type=='gas'],na.rm = TRUE)
+mean(data85$price[data85$fuel_type=='diesel'],na.rm = TRUE)
+
+##b. What is the make of the car with twelve num_of_cylinders? Jaguar
+data85$make[data85$num_of_cylinders=='twelve']
+
+##c. What is the make that has the most diesel cars?
+which.max(table(data85$make[data85$fuel_type=='diesel']))
+
+
+##Peugot has the most diesel cars
+
+##d. What is the price of the car with the largest amount of horsepower?
+data85$price[data85$horsepower== max(data85$horsepower,na.rm=TRUE)]
+##The data set doesn't have the price for this car
+
+##e. What is the bottom 10th percentile of city_mpg? 17
+quantile(data85$city_mpg,0.1)
+
+##f. What is the top 10th percentile of highway_mpg? 38
+quantile(data85$highway_mpg,0.9)
+
+##g. What is the median price of those cars in the bottom 10th percentile of city_mpg? 32250
+data85$price[data85$city_mpg <= quantile(data85$city_mpg,0.1)]
+median(data85$price[data85$city_mpg <= quantile(data85$city_mpg,0.1)],na.rm = TRUE)
+
+```
+Part 6.Technical Questions about data frames
+
+a. What happens when you use the dollar $ operator on a data frame, attempting to use the name of a column that does not exist? For example: dat$xyz where there is no column named xyz.
+    
+    _It will return as NULL._
+
+b. Which of the following commands fails to return the vector mpg which is a column in the built-in data frame mtcars:
+    
+    _The command 4. mtcars[ ,mpg] fails to return the vector mpg._
+
+c. Based on your answer for part (b), what is the reason that makes such command to fail?
+   
+    _Since it doesn't have quotation mark, R Studio considered mpg as an object. However, we never create an object called mpg nor indicate it is the column name of our data. Thus, it fails to return._
+
+d. Can you include an R list as a ¡°column¡± of a data frame? YES or NO, and why.
+    
+    _Yes we can. If a list or data frame or matrix is passed to ¡®data.frame¡¯ it is as if each component or column had been passed as a separate argument._
+
+e.What happens when you apply as.list() to a data frame? e.g. as.list(mtcars)
+    
+    _It will return as a list. Like [[1]]_
+                                    _[1] "audi"_
+f. Consider the command: abc <- as.list(mtcars). What function(s) can you use to convert the object abc into a data frame?            
+    _We can use the function as.data.frame(abc) to convert the object into a data frame._                        
+
+Part 7. Correlation
+
+```{r}
+library(corrplot)
+
+qdat<- data.frame(data85$wheel_base,data85$length,data85$width,data85$height,data85$curb_weight,data85$engine_size,data85$bore,data85$stroke,data85$compression_ratio,data85$horsepower,data85$peak_rpm,data85$city_mpg,data85$highway_mpg,data85$price)
+
+
+c85 <- cor(qdat,use = "complete.obs")
+head(round(c85,2))
+corrplot(c85,method = "circle")
+corrplot(c85,method = "pie")
+
+```
+
+
+Base on the graph we see that the dark blue means there are strong positive correlation between these two variables, and the dark red means there are strong negative correlation between these two variables. For example, the wheel base and the width have a strong positive correlation which means as wheel base gose up,the width will also goes up. Another example will be city mpg and horsepower, the higher city mpg results in lower horsepower which is an example of negative correlation. There are also some variables that are not correlate at all, like, bore and compression ratio.
+
+
+Part 8.Principal Components Analysis
+
+```{r}
+qdat<-na.omit(qdat)
+pac_dat85<-prcomp(qdat,scale. = TRUE)
+pac_dat85
+
+pac_dat851<-data.frame(pac_dat85["x"])
+pac_dat851
+
+eigenvalues <- pac_dat85$sdev^2
+eigenvalues
+
+loadings<- pac_dat85$rotation
+round(loadings,3)
+
+points<- pac_dat85$x
+round(head(points,5),3)
+
+percent_eigen = (eigenvalues/sum(eigenvalues))*100
+percent_eigen
+
+
+data.frame(eigenvalues,percent_eigen)
+##The proportion of variation that captured by the first three components are 53.923%,16.202%,and 8.808%
+
+##8.2
+
+plot(pac_dat851[,1:2],main = "Scatterplot of PC1 and PC2")##scatter plot of the first two components
+abline(a=0,b=0,v= 0)
+
+plot(loadings,main = "Plots of first two loading")##Plots of first two loading
+abline(a=0,b=0,v= 0)
+
+library(factoextra)
+fviz_pca_var(pac_dat85) ##Eigenvectors of variables
+
+biplot(pac_dat85,scale = 0)
+
+```
+
+
+The first plot is the sctterplot of PC1 and PC2, as we can see the plots are mostly centered at the middle. Therefore, we can say that they have a relatively strong correlation. Also, most of the plots are located at the 3rd quadrant and 1st quadrant, we can say it is a positive correlation. In the second plot there are first two variables in loading.Since they are too few of plots, we are hard to tell whether it has a correlation or not.The Biplot is the combination of eigenvectors and PCs, it is hard to read since we have a large data set.
